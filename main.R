@@ -53,7 +53,31 @@ inital_plots <- function(data) {
   lines(data$vertices,data$vertices-1, col = "blue")
 }
 
-inital_check <- function(data) {
+initial_check <- function(data) {
+  
+  v <- length(data$vertices)
+  secDeg <- mean(data$degree_2nd_moment)
+  meanL <- mean(data$mean_length)
+  
+  cat("Checking metrics satisfaction\n")
+  if ((4 - (6/v)) > secDeg) {
+    cat("First check failed\n")
+    return(FALSE)
+  }
+  if(secDeg > v) {
+    cat("Second check failed\n")
+    return(FALSE)
+  }
+  if(((v/(8*(v-1)))*secDeg+(1/2)) > meanL) {
+    cat("Third check failed\n")
+    return(FALSE)
+  }
+  if(meanL > (v-1)) {
+    cat("Forth check failed\n")
+    return(FALSE)
+  }
+  cat("All checks passed\n")
+  return(TRUE)
   
 }
 
@@ -88,10 +112,11 @@ for (x in 1:nrow(source)) {
   language <- source$language[x]
   data = get_language_data(source$file[x])
   
-  inital_check(data)
-  mean_data = aggregate(data, list(data$vertices), mean)
-  
-  fit_model_0(data, mean_data)
-  fit_model_2(data, mean_data)
+  if(initial_check(data) == TRUE) {
+    mean_data = aggregate(data, list(data$vertices), mean)
+    
+    fit_model_0(data, mean_data)
+    fit_model_2(data, mean_data)
+  }
 }
 

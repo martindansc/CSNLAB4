@@ -5,11 +5,6 @@ get_language_data <- function(file_path) {
   return(language)
 }
 
-fit_model <- function(data, a_initial, b_initial) {
-  nonlinear_model = nls(degree_2nd_moment~a*vertices^b, data=data,start = list(a = a_initial, b = b_initial), trace = TRUE)
-  return(nonlinear_model)
-}
-
 print_null_results <- function(data) {
   RSS <- sum((data$mean_length-(data$vertices+1)/3)^2)
   n <- length(data$vertices)
@@ -98,7 +93,7 @@ fit_model_2 <- function(data, mean_data) {
   a_initial = exp(coef(linear_model)[1])
   b_initial = coef(linear_model)[2]
   
-  nonlinear_model <- fit_model(mean_data, a_initial, b_initial)
+  nonlinear_model <- nls(degree_2nd_moment~a*vertices^b, data=mean_data,start = list(a = a_initial, b = b_initial), trace = TRUE)
   print_results(nonlinear_model)
   
   plot(log(data$vertices), log(data$degree_2nd_moment),xlab = "log(vertices)", ylab = "log(mean dependency length)")

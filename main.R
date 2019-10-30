@@ -5,13 +5,13 @@ get_language_data <- function(file_path) {
   return(language)
 }
 
-# Build models
-source = read.table("catalan_only.txt",  header = TRUE, as.is = c("language","file"))
-  
-for (x in 1:nrow(source)) {
-  language <- source$language[x]
-  
-  data = get_language_data(source$file[x])
+fit_model <- function(data) {
+  a_initial = 4
+  b_initial = 4
+  nonlinear_model = nls(mean_length~a*vertices^b, data=data,start = list(a = a_initial, b = b_initial), trace = TRUE)
+}
+
+inital_plots <- function(data) {
   cat(language, length(data$vertices), mean(data$vertices), sd(data$vertices), mean(data$degree_2nd_moment), sd(data$degree_2nd_moment), '\n')
   
   plot(data$vertices, data$degree_2nd_moment,xlab = "vertices", ylab = paste(language, 'degree second moment'))
@@ -28,4 +28,14 @@ for (x in 1:nrow(source)) {
   lines(data$vertices,4-6/data$vertices, col = "blue")
   lines(data$vertices,data$vertices-1, col = "blue")
 }
-    
+  
+
+# MAIN
+source = read.table("catalan_only.txt",  header = TRUE, as.is = c("language","file"))
+
+for (x in 1:nrow(source)) {
+  language <- source$language[x]
+  data = get_language_data(source$file[x])
+  inital_plots(data)
+}
+

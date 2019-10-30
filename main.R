@@ -96,9 +96,33 @@ fit_model_2 <- function(data, mean_data) {
   nonlinear_model <- nls(degree_2nd_moment~a*vertices^b, data=mean_data,start = list(a = a_initial, b = b_initial), trace = TRUE)
   print_results(nonlinear_model)
   
-  plot(log(data$vertices), log(data$degree_2nd_moment),xlab = "log(vertices)", ylab = "log(mean dependency length)")
+  plot(log(data$vertices), log(data$degree_2nd_moment),xlab = "log(vertices)", ylab = "log(degree 2nd moment)")
   lines(log(mean_data$vertices), log(fitted(nonlinear_model)), col = "green")
 }
+
+fit_model_3 <- function(data, mean_data) {
+  
+  a_initial = 10
+  c_initial = 10
+  
+  nonlinear_model <- nls(degree_2nd_moment~a*exp(c*vertices), data=mean_data,start = list(a = a_initial, c = c_initial), trace = TRUE)
+  print_results(nonlinear_model)
+  
+  plot(log(data$vertices), log(data$degree_2nd_moment),xlab = "log(vertices)", ylab = "log(degree 2nd moment)")
+  lines(log(mean_data$vertices), log(fitted(nonlinear_model)), col = "green")
+}
+
+fit_model_4 <- function(data, mean_data) {
+  
+  a_initial = 4
+  
+  nonlinear_model <- nls(degree_2nd_moment~a*log(vertices), data=mean_data,start = list(a = a_initial), trace = TRUE)
+  print_results(nonlinear_model)
+  
+  plot(log(data$vertices), log(data$degree_2nd_moment),xlab = "log(vertices)", ylab = "log(degree 2nd moment)")
+  lines(log(mean_data$vertices), log(fitted(nonlinear_model)), col = "green")
+}
+
 
 # MAIN
 source = read.table("catalan_only.txt",  header = TRUE, as.is = c("language","file"))
@@ -112,6 +136,7 @@ for (x in 1:nrow(source)) {
     
     fit_model_0(data, mean_data)
     fit_model_2(data, mean_data)
+    fit_model_4(data, mean_data)
   }
 }
 

@@ -9,6 +9,21 @@ fit_model <- function(data, a_initial, b_initial) {
   nonlinear_model = nls(degree_2nd_moment~a*vertices^b, data=data,start = list(a = a_initial, b = b_initial), trace = TRUE)
 }
 
+print_null_results <- function(data) {
+  RSS <- sum((data$mean_length-(data$vertices+1)/3)^2)
+  n <- length(data$vertices)
+  p <- 0
+  s <- sqrt(RSS/(n - p))
+  
+  AIC <- n*log(2*pi) + n*log(RSS/n) + n + 2*(p + 1)
+  
+  cat("Deviance: ", RSS, '\n')
+  
+  cat("AIC: ", AIC, '\n')
+  
+  cat("s: ", s, '\n')
+}
+
 print_results <- function(model) {
   cat("Deviance: ", deviance(nonlinear_model), '\n')
   
@@ -36,7 +51,34 @@ inital_plots <- function(data) {
   lines(data$vertices,4-6/data$vertices, col = "blue")
   lines(data$vertices,data$vertices-1, col = "blue")
 }
+
+inital_check <- function(data) {
   
+}
+
+fit_model_0 <- function(data, mean_data) {
+  print_null_results(data)
+  print_null_results(mean_data)
+  
+  plot(data$vertices, data$degree_2nd_moment,xlab = "vertices", ylab = "degree 2nd moment")
+  lines(mean_data$vertices,mean_data$degree_2nd_moment, col = "green")
+  lines(data$vertices,(1 - 1/data$vertices)*(5 - 6/data$vertices), col = "red")
+  lines(data$vertices,4-6/data$vertices, col = "blue")
+  lines(data$vertices,data$vertices-1, col = "blue")
+}
+
+fit_model_2 <- function(data, mean_data) {
+  linear_model = lm(log(degree_2nd_moment)~log(vertices), data)
+  
+  a_initial = exp(coef(linear_model)[1])
+  b_initial = coef(linear_model)[2]
+  
+  nonlinear_model <- fit_model(mean_data, a_initial, b_initial)
+  print_results(nonlinear_model)
+  
+  plot(log(data$vertices), log(data$degree_2nd_moment),xlab = "log(vertices)", ylab = "log(mean dependency length)")
+  lines(log(mean_data$vertices), log(fitted(nonlinear_model)), col = "green")
+}
 
 # MAIN
 source = read.table("catalan_only.txt",  header = TRUE, as.is = c("language","file"))
@@ -44,15 +86,11 @@ source = read.table("catalan_only.txt",  header = TRUE, as.is = c("language","fi
 for (x in 1:nrow(source)) {
   language <- source$language[x]
   data = get_language_data(source$file[x])
-
-  linear_model = lm(log(mean_length)~log(vertices), data)
-    
-  a_initial = exp(coef(linear_model)[1])
-  b_initial = coef(linear_model)[2]
   
+  inital_check(data)
   mean_data = aggregate(data, list(data$vertices), mean)
   
-  nonlinear_model <- fit_model(mean_data, a_initial, b_initial)
-  print_results(nonlinear_model)
+  fit_model_0(data, mean_data)
+  fit_model_2(data, mean_data)
 }
 

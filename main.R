@@ -5,10 +5,18 @@ get_language_data <- function(file_path) {
   return(language)
 }
 
-fit_model <- function(data) {
-  a_initial = 4
-  b_initial = 4
-  nonlinear_model = nls(mean_length~a*vertices^b, data=data,start = list(a = a_initial, b = b_initial), trace = TRUE)
+fit_model <- function(data, a_initial, b_initial) {
+  nonlinear_model = nls(degree_2nd_moment~a*vertices^b, data=data,start = list(a = a_initial, b = b_initial), trace = TRUE)
+}
+
+print_results <- function(model) {
+  cat("Deviance: ", deviance(nonlinear_model), '\n')
+  
+  cat("AIC: ", AIC(nonlinear_model), '\n')
+  
+  cat("s: ", sqrt(deviance(nonlinear_model)/df.residual(nonlinear_model)), '\n')
+  
+  cat("Best parameters: ", coef(nonlinear_model), '\n')
 }
 
 inital_plots <- function(data) {
@@ -36,6 +44,15 @@ source = read.table("catalan_only.txt",  header = TRUE, as.is = c("language","fi
 for (x in 1:nrow(source)) {
   language <- source$language[x]
   data = get_language_data(source$file[x])
-  inital_plots(data)
+
+  linear_model = lm(log(mean_length)~log(vertices), data)
+    
+  a_initial = exp(coef(linear_model)[1])
+  b_initial = coef(linear_model)[2]
+  
+  mean_data = aggregate(data, list(data$vertices), mean)
+  
+  nonlinear_model <- fit_model(mean_data, a_initial, b_initial)
+  print_results(nonlinear_model)
 }
 

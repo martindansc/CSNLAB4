@@ -7,6 +7,7 @@ get_language_data <- function(file_path) {
 
 fit_model <- function(data, a_initial, b_initial) {
   nonlinear_model = nls(degree_2nd_moment~a*vertices^b, data=data,start = list(a = a_initial, b = b_initial), trace = TRUE)
+  return(nonlinear_model)
 }
 
 print_null_results <- function(data) {
@@ -25,13 +26,13 @@ print_null_results <- function(data) {
 }
 
 print_results <- function(model) {
-  cat("Deviance: ", deviance(nonlinear_model), '\n')
+  cat("Deviance: ", deviance(model), '\n')
   
-  cat("AIC: ", AIC(nonlinear_model), '\n')
+  cat("AIC: ", AIC(model), '\n')
   
-  cat("s: ", sqrt(deviance(nonlinear_model)/df.residual(nonlinear_model)), '\n')
+  cat("s: ", sqrt(deviance(model)/df.residual(model)), '\n')
   
-  cat("Best parameters: ", coef(nonlinear_model), '\n')
+  cat("Best parameters: ", coef(model), '\n')
 }
 
 inital_plots <- function(data) {

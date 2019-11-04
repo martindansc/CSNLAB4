@@ -132,9 +132,10 @@ fit_model_2 <- function(language, data, mean_data) {
 }
 
 fit_model_3 <- function(language, data, mean_data) {
+  linear_model = lm(log(degree_2nd_moment)~vertices, data)
   
-  a_initial = 10
-  c_initial = 10
+  a_initial = exp(coef(linear_model)[1]) 
+  c_initial = coef(linear_model)[2]
   
   nonlinear_model <- nls(degree_2nd_moment~a*exp(c*vertices), data=mean_data,start = list(a = a_initial, c = c_initial), trace = TRUE)
   print_results(nonlinear_model)
@@ -143,8 +144,9 @@ fit_model_3 <- function(language, data, mean_data) {
 }
 
 fit_model_4 <- function(language, data, mean_data) {
+  linear_model = lm(log(degree_2nd_moment)~log(vertices), data)
   
-  a_initial = 4
+  a_initial = coef(linear_model)[2]
   
   nonlinear_model <- nls(degree_2nd_moment~a*log(vertices), data=mean_data,start = list(a = a_initial), trace = TRUE)
   print_results(nonlinear_model)
@@ -163,11 +165,12 @@ for (x in 1:nrow(source)) {
   if(initial_check(data) == TRUE) {
     mean_data = aggregate(data, list(data$vertices), mean)
     
-    # fit_model_0(language, data, mean_data)
-    # fit_model_1(language, data, mean_data)
-    # fit_model_2(language, data, mean_data)
-    # fit_model_4(language, data, mean_data)
-    fit_model_1_plus(language, data, mean_data)
+    fit_model_0(language, data, mean_data)
+    fit_model_1(language, data, mean_data)
+    fit_model_2(language, data, mean_data)
+    fit_model_3(language, data, mean_data)
+    fit_model_4(language, data, mean_data)
+    #fit_model_1_plus(language, data, mean_data)
   }
 }
 

@@ -21,7 +21,7 @@ print_null_results <- function(data) {
   
   return(list("Deviance" = RSS, "AIC" = aic, "s" = s, "coefs" = c()))
 }
-
+  
 print_results <- function(model) {
   
   dev <- deviance(model)
@@ -52,6 +52,18 @@ save_plot <- function(language, name, data, mean_data, model, xlab="vertices", y
   }
   
   png(filename=paste(directory, "/", name, ".png", sep = ""))
+  plot(data$vertices, data$degree_2nd_moment,xlab = xlab, ylab = ylab)
+  lines(mean_data$vertices, fitted(model), col = "green")
+  dev.off()
+}
+
+save_plot_log <- function(language, name, data, mean_data, model, xlab="log vertices", ylab="degree second moment") {
+  directory <- paste("plots/", language, sep="")
+  if(!dir.exists(directory)) {
+    dir.create(directory)
+  }
+  
+  png(filename=paste(directory, "/", name, "_log.png", sep = ""))
   plot(log(data$vertices), log(data$degree_2nd_moment),xlab = xlab, ylab = ylab)
   lines(log(mean_data$vertices), log(fitted(model)), col = "green")
   dev.off()
@@ -64,6 +76,7 @@ save_generic_plot <- function(path, myfunc) {
 }
 
 inital_plots <- function(data) {
+  print("n, mean(vertices), sd(vertices),mean(degree_2nd_moment), sd(degree_2nd_moment)")
   cat(language, length(data$vertices), mean(data$vertices), sd(data$vertices), mean(data$degree_2nd_moment), sd(data$degree_2nd_moment), '\n')
   
   plot(data$vertices, data$degree_2nd_moment,xlab = "vertices", ylab = paste(language, 'degree second moment'))
@@ -115,76 +128,110 @@ check_homocesdasticity <-function(data) {
 }
 
 fit_model_0 <- function(language, data, mean_data) {
-  print_null_results(data)
-  print_null_results(mean_data)
+  print("------ Model 0 -------")
+  # print_null_results(data)
+  
   
   plot(data$vertices, data$degree_2nd_moment,xlab = "vertices", ylab = "degree 2nd moment")
   lines(mean_data$vertices,mean_data$degree_2nd_moment, col = "green")
   lines(data$vertices, (1 - 1/data$vertices)*(5 - 6/data$vertices), col = "red")
   lines(data$vertices, 4-6/data$vertices, col = "blue")
   lines(data$vertices, data$vertices-1, col = "blue")
+  
+  return(print_null_results(mean_data))
 }
 
 fit_model_1 <- function(language, data, mean_data) {
-  linear_model = lm(log(degree_2nd_moment)~log(vertices), data)
-  b_initial = coef(linear_model)[2]
+  print("------ Model 1 -------")
   
-  nonlinear_model <- nls(degree_2nd_moment~(vertices/2)^b, data=mean_data, start = list(b = b_initial), trace = TRUE)
+  linear_model = lm(log(degree_2nd_moment)~log(vertices) + 0, data)
+  b_initial = coef(linear_model)[1]
+  
+  nonlinear_model <- nls(degree_2nd_moment~(vertices/2)^b, data=mean_data, start = list(b = b_initial), trace = FALSE)
   
   save_plot(language, "model_1", data, mean_data, nonlinear_model)
+  save_plot_log(language, "model_1", data, mean_data, nonlinear_model)
   
   return(print_results(nonlinear_model))
 }
 
 fit_model_1_plus <- function(language, data, mean_data) {
+  print("------ Model 1 + -------")
+  
+  
   linear_model = lm(log(degree_2nd_moment)~log(vertices), data)
   b_initial = coef(linear_model)[2]
   
-  nonlinear_model <- nls(degree_2nd_moment~(vertices/2)^b+d, data=mean_data, start = list(b = b_initial, d = 0), trace = TRUE)
+  nonlinear_model <- nls(degree_2nd_moment~(vertices/2)^b+d, data=mean_data, start = list(b = b_initial, d = 0), trace = FALSE)
   
   save_plot(language, "model_1_+", data, mean_data, nonlinear_model)
+  save_plot_log(language, "model_1_+", data, mean_data, nonlinear_model)
   
   return(print_results(nonlinear_model))
 }
 
 fit_model_2 <- function(language, data, mean_data) {
+  print("------ Model 2 -------")
+  
   linear_model = lm(log(degree_2nd_moment)~log(vertices), data)
   
   a_initial = exp(coef(linear_model)[1])
   b_initial = coef(linear_model)[2]
   
-  nonlinear_model <- nls(degree_2nd_moment~a*vertices^b, data=mean_data,start = list(a = a_initial, b = b_initial), trace = TRUE)
+  nonlinear_model <- nls(degree_2nd_moment~a*vertices^b, data=mean_data,start = list(a = a_initial, b = b_initial), trace = FALSE)
   
   save_plot(language, "model_2", data, mean_data, nonlinear_model)
+  save_plot_log(language, "model_2", data, mean_data, nonlinear_model)
   
   return(print_results(nonlinear_model))
 }
 
 fit_model_3 <- function(language, data, mean_data) {
+  print("------ Model 3 -------")
+  
   linear_model = lm(log(degree_2nd_moment)~vertices, data)
   
   a_initial = exp(coef(linear_model)[1]) 
   c_initial = coef(linear_model)[2]
   
-  nonlinear_model <- nls(degree_2nd_moment~a*exp(c*vertices), data=mean_data,start = list(a = a_initial, c = c_initial), trace = TRUE)
+  nonlinear_model <- nls(degree_2nd_moment~a*exp(c*vertices), data=mean_data,start = list(a = a_initial, c = c_initial), trace = FALSE)
   
   save_plot(language, "model_3", data, mean_data, nonlinear_model)
+  save_plot_log(language, "model_3", data, mean_data, nonlinear_model)
   
   return(print_results(nonlinear_model))
 }
 
 fit_model_4 <- function(language, data, mean_data) {
+  print("------ Model 4 -------")
+  
   linear_model = lm(log(degree_2nd_moment)~log(vertices), data)
   
   a_initial = coef(linear_model)[2]
   
-  nonlinear_model <- nls(degree_2nd_moment~a*log(vertices), data=mean_data,start = list(a = a_initial), trace = TRUE)
+  nonlinear_model <- nls(degree_2nd_moment~a*log(vertices), data=mean_data,start = list(a = a_initial), trace = FALSE)
   
   save_plot(language, "model_4", data, mean_data, nonlinear_model)
+  save_plot_log(language, "model_4", data, mean_data, nonlinear_model)
   
   return(print_results(nonlinear_model))
 }
 
+fit_model_4_plus <- function(language, data, mean_data) {
+  print("------ Model 4 + -------")
+  
+  linear_model = lm(log(degree_2nd_moment)~log(vertices), data)
+  
+  a_initial = coef(linear_model)[2]
+  d_inital = 0
+  
+  nonlinear_model <- nls(degree_2nd_moment~a*log(vertices) + d, data=mean_data,start = list(a = a_initial, d = d_inital), trace = FALSE)
+  
+  save_plot(language, "model_4_+", data, mean_data, nonlinear_model)
+  save_plot_log(language, "model_4_+", data, mean_data, nonlinear_model)
+  
+  return(print_results(nonlinear_model))
+}
 
 # MAIN
 source = read.table("catalan_only.txt",  header = TRUE, as.is = c("language","file"))
@@ -193,20 +240,24 @@ for (x in 1:nrow(source)) {
   results = list()
   
   language <- source$language[x]
+  
+  cat("Language: ", language, '\n')
   data = get_language_data(source$file[x])
   
-  if(initial_check(data) == TRUE) {
-    mean_data = aggregate(data, list(data$vertices), mean)
-    
-    results$r0 = fit_model_0(language, data, mean_data)
-    results$r1 = fit_model_1(language, data, mean_data)
-    results$r2 = fit_model_2(language, data, mean_data)
-    results$r3 = fit_model_3(language, data, mean_data)
-    results$r4 = fit_model_4(language, data, mean_data)
-    results$r1p = fit_model_1_plus(language, data, mean_data)
-    
-    print_increase_table(results, "AIC")
-  }
+  inital_plots(data)
+  
+  initial_check(data)
+  mean_data = aggregate(data, list(data$vertices), mean)
+  
+  results$r0 = fit_model_0(language, data, mean_data)
+  results$r1 = fit_model_1(language, data, mean_data)
+  results$r2 = fit_model_2(language, data, mean_data)
+  results$r3 = fit_model_3(language, data, mean_data)
+  results$r4 = fit_model_4(language, data, mean_data)
+  results$r1p = fit_model_1_plus(language, data, mean_data)
+  results$r4p = fit_model_4_plus(language, data, mean_data)
+  
+  print_increase_table(results, "AIC")
 }
 
 

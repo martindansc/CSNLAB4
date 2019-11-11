@@ -146,6 +146,7 @@ fit_model_1 <- function(language, data, mean_data) {
   
   linear_model = lm(log(degree_2nd_moment)~log(vertices) + 0, data)
   b_initial = coef(linear_model)[1]
+  print(b_initial)
   
   nonlinear_model <- nls(degree_2nd_moment~(vertices/2)^b, data=mean_data, start = list(b = b_initial), trace = FALSE)
   
@@ -161,6 +162,8 @@ fit_model_1_plus <- function(language, data, mean_data) {
   
   linear_model = lm(log(degree_2nd_moment)~log(vertices), data)
   b_initial = coef(linear_model)[2]
+  
+  print(b_initial)
   
   nonlinear_model <- nls(degree_2nd_moment~(vertices/2)^b+d, data=mean_data, start = list(b = b_initial, d = 0), trace = FALSE)
   
@@ -178,6 +181,9 @@ fit_model_2 <- function(language, data, mean_data) {
   a_initial = exp(coef(linear_model)[1])
   b_initial = coef(linear_model)[2]
   
+  print(a_initial)
+  print(b_initial)
+  
   nonlinear_model <- nls(degree_2nd_moment~a*vertices^b, data=mean_data,start = list(a = a_initial, b = b_initial), trace = FALSE)
   
   save_plot(language, "model_2", data, mean_data, nonlinear_model)
@@ -194,6 +200,10 @@ fit_model_3 <- function(language, data, mean_data) {
   a_initial = exp(coef(linear_model)[1]) 
   c_initial = coef(linear_model)[2]
   
+  
+  print(a_initial)
+  print(c_initial)
+  
   nonlinear_model <- nls(degree_2nd_moment~a*exp(c*vertices), data=mean_data,start = list(a = a_initial, c = c_initial), trace = FALSE)
   
   save_plot(language, "model_3", data, mean_data, nonlinear_model)
@@ -208,6 +218,8 @@ fit_model_4 <- function(language, data, mean_data) {
   linear_model = lm(log(degree_2nd_moment)~log(vertices), data)
   
   a_initial = coef(linear_model)[2]
+  
+  print(a_initial)
   
   nonlinear_model <- nls(degree_2nd_moment~a*log(vertices), data=mean_data,start = list(a = a_initial), trace = FALSE)
   
@@ -224,6 +236,8 @@ fit_model_4_plus <- function(language, data, mean_data) {
   
   a_initial = coef(linear_model)[2]
   d_inital = 0
+  
+  print(a_initial)
   
   nonlinear_model <- nls(degree_2nd_moment~a*log(vertices) + d, data=mean_data,start = list(a = a_initial, d = d_inital), trace = FALSE)
   
